@@ -1,0 +1,3 @@
+# Scala Concurrency Case Study
+
+So many notes to come...
