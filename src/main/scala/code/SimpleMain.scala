@@ -9,54 +9,23 @@ object SimpleMain {
   val lazyExample=
     () => work("B")
 
-  def sleepExample =
-    log("C") {
-      Thread.sleep(1000)
-      work("D")
-    }
-
-  def sequentialExample = {
-    log("D") {
-      (
-        work("E"),
-        work("F")
-      )
-    }
-  }
+  def sequentialExample =
+    ???
 
   def verySequentialExample =
-    log("G") {
-      (1 to 20).toList.map(work)
-    }
+    ???
+
+  def sleepExample =
+    ???
 
   def happyPathExample =
-    log("H") {
-      try {
-        println("Acquiring resource")
-        log("I") {
-          42
-        }
-      } finally {
-        println("Releasing resource")
-      }
-    }
+    ???
 
   def unhappyPathExample =
-    log("J") {
-      try {
-        println("Acquiring resource")
-        log("K") {
-          ???
-        }
-      } finally {
-        println("Releasing resource")
-      }
-    }
+    ???
 
   def mapReduceExample =
-    log("L") {
-      (1 to FIB_MAX).map(fib).sum
-    }
+    ???
 
   def runExample(func: => Any): Unit = {
     val ans = func

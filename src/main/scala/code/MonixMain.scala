@@ -17,51 +17,39 @@ object MonixMain {
 
   import Helpers._
 
+  /** Call work() immediately. Don't wait. */
   val eagerExample =
-    Task.now(work("A"))
+    ???
 
+  /** Call work() work lazily. Wait until needed. */
   val lazyExample =
-    Task.eval(work("B"))
+    ???
 
-  def sleepExample(implicit timer: Timer[Task]) =
-    logF("C") {
-      for {
-        _ <- Task.sleep(1.second)
-        a <- Task.eval(work("D"))
-      } yield a
-    }
+  /** Call work() twice in sequence. Collect a tuple of the results. */
+  val sequentialExample =
+    ???
 
-  def sequentialExample = {
-    logF("F") {
-      for {
-        a <- Task.eval(work("G"))
-        b <- Task.eval(work("H"))
-      } yield (a, b)
-    }
-  }
+  /** Call work() twice in parallel. Collect a tuple of the results. */
+  val parallelExample =
+    ???
 
-  def parallelExample = {
-    logF("I") {
-      for {
-        a <- Task.evalAsync(work("J"))
-        b <- Task.evalAsync(work("K"))
-      } yield (a, b)
-    }
-  }
+  /** Call work() twice in parallel. Collect a tuple of the results. */
+  val verySequentialExample =
+    ???
 
-  def verySequentialExample =
-    (1 to 20).toList.traverse(i => Task(work(i)))
+  /** Call work() 20 times in parallel. Collect a list of the results. */
+  val veryParallelExample =
+    ???
 
-  def veryParallelExample =
-    (1 to 20).toList.parTraverse(i => Task(work(i)))
+  /** Sleep for one second then call work(). Don't block! */
+  val sleepExample =
+    ???
 
-  def raceExample =
-    Task.race(
-      Task(work("H1")),
-      Task(work("I1")) *> Task(work("I2")) *> Task.cancelBoundary *> Task(work("I3"))
-    )
+  /** Call work() twice in parallel. Return the first result to complete. */
+  val raceExample =
+    ???
 
-  def resource: Resource[Task, Int] =
+  val resource: Resource[Task, Int] =
     Resource.make {
       Task {
         val resource = (Math.random * 1000).toInt
@@ -72,24 +60,28 @@ object MonixMain {
       Task(println("Releasing resource: " + resource))
     }
 
-  def happyPathExample =
-    resource.use { resource =>
-      Task(println("Using resource: " + resource))
-    }
+  /**
+   * Call acquire(), do work, then call release().
+   * Pass the acquired resource to release.
+   * Your code for this and unhappyPathExample should be the same.
+   */
+  val happyPathExample =
+    ???
 
-  def unhappyPathExample =
-    resource.use { resource =>
-      Task(???)
-    }
+  /**
+   * Call acquire(), throw an exception, then call release().
+   * Pass the acquired resource to release.
+   * Your code for this and happyPathExample should be the same.
+   */
+  val unhappyPathExample =
+    ???
 
-  def mapReduceExample =
-    logF("K") {
-      (1 to FIB_MAX)
-        .toList
-        .map(i => Task(log(i.toString)(fib(i))))
-        .parSequence
-        .map(_.combineAll)
-    }
+  /**
+   * Calculate the first FIB_MAX fibonacci numbers in parallel
+   * and add up all the results.
+   */
+  val mapReduceExample =
+    ???
 
   def runExample(numThreads: Int)(task: => Task[Any]): Unit = {
     val service: ExecutorService =

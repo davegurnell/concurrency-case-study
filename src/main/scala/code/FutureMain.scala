@@ -12,64 +12,39 @@ object FutureMain {
 
   import Helpers._
 
-  val eagerExample =
-    Future.successful(work("A"))
+  /** Call work() immediately. Don't wait. */
+  def eagerExample(implicit ec: ExecutionContext) =
+    ???
 
+  /** Call work() work lazily. Wait until needed. */
   def lazyExample(implicit ec: ExecutionContext) =
-    Future(work("B"))
+    ???
 
-  def sleepExample(implicit ec: ExecutionContext) = {
-    import akka.actor.ActorSystem
-    import akka.pattern.Patterns.after
+  /** Call work() twice in sequence. Collect a tuple of the results. */
+  def sequentialExample(implicit ec: ExecutionContext) =
+    ???
 
-    val as = ActorSystem()
+  /** Call work() twice in parallel. Collect a tuple of the results. */
+  def parallelExample(implicit ec: ExecutionContext) =
+    ???
 
-    after(1.second, as.scheduler, ec, () => Future(work("C")))
-  }
+  /** Call work() 20 times in sequence. Collect a list of the results. */
+  def verySequentialExample(implicit ec: ExecutionContext) =
+    ???
 
-  def sequentialExample(implicit ec: ExecutionContext) = {
-    for {
-      a <- Future(work("G"))
-      b <- Future(work("H"))
-    } yield (a, b)
-  }
-
-  def parallelExample(implicit ec: ExecutionContext) = {
-    val futureA = Future(work("F"))
-    val futureB = Future(work("G"))
-    for {
-      a <- futureA
-      b <- futureB
-    } yield (a, b)
-  }
-
-  def verySequentialExample(implicit ec: ExecutionContext) = {
-    val inputs: List[Future[Int]] =
-      (1 to 20).toList.map(Future.successful)
-
-    val seed: Future[List[Int]] =
-      Future.successful(List.empty[Int])
-
-    inputs.foldRight(seed) { (index, accum) =>
-      for {
-        i <- index
-        t <- accum
-        h <- Future(work(i))
-      } yield h :: t
-    }
-  }
-
+  /** Call work() 20 times in parallel. Collect a list of the results. */
   def veryParallelExample(implicit ec: ExecutionContext) =
-    Future.traverse((1 to 20).toList) { i =>
-      Future(work(i))
-    }
+    ???
 
+  /** Sleep for one second then call work(). Don't block! */
+  def sleepExample(implicit ec: ExecutionContext) =
+    ???
+
+  /** Call work() twice in parallel. Return the first result to complete. */
   def raceExample(implicit ec: ExecutionContext) =
-    Future.firstCompletedOf(List(
-      Future(work("H1")),
-      Future(work("I1")) *> Future(work("I2")) *> Future(work("I3"))
-    ))
+    ???
 
+  /** Helper function for use in happyPathExample and unhappyPathExample */
   def acquire(implicit ec: ExecutionContext): Future[Int] =
     Future {
       val resource = (Math.random * 1000).toInt
@@ -77,29 +52,34 @@ object FutureMain {
       resource
     }
 
+  /** Helper function for use in happyPathExample and unhappyPathExample */
   def release(resource: Int)(implicit ec: ExecutionContext): Future[Unit] =
     Future {
       println("Releasing resource: " + resource)
     }
 
+  /**
+   * Call acquire(), do work, then call release().
+   * Pass the acquired resource to release.
+   * Your code for this and unhappyPathExample should be the same.
+   */
   def happyPathExample(implicit ec: ExecutionContext) =
-    acquire.flatMap { resource =>
-      Future(work("H"))
-        .flatMap(ans => release(resource) *> Future.successful(ans))
-        .recoverWith { case exn => release(resource) *> Future.failed(exn) }
-    }
+    ???
 
+  /**
+   * Call acquire(), throw an exception, then call release().
+   * Pass the acquired resource to release.
+   * Your code for this and happyPathExample should be the same.
+   */
   def unhappyPathExample(implicit ec: ExecutionContext) =
-    acquire.flatMap { resource =>
-      Future(???)
-        .flatMap(ans => release(resource) *> Future.successful(ans))
-        .recoverWith { case exn => release(resource) *> Future.failed(exn) }
-    }
+    ???
 
+  /**
+   * Calculate the first FIB_MAX fibonacci numbers in parallel
+   * and add up all the results.
+   */
   def mapReduceExample(implicit ec: ExecutionContext) =
-    Future.traverse((1 to FIB_MAX).toList) { i =>
-      Future(log(i.toString)(fib(i)))
-    }.map(_.combineAll)
+    ???
 
   def runExample(numThreads: Int)(func: ExecutionContext => Future[Any]): Unit = {
     val service: ExecutorService =
@@ -120,7 +100,7 @@ object FutureMain {
     println("Number of CPUs: " + Runtime.getRuntime.availableProcessors())
 
     args(0) match {
-      case "eager" => runExample(numThreads = 1)(_ => eagerExample)
+      case "eager" => runExample(numThreads = 1)(eagerExample(_))
       case "lazy" => runExample(numThreads = 1)(lazyExample(_))
       case "seq1" => runExample(numThreads = 1)(sequentialExample(_))
       case "seq2" => runExample(numThreads = 2)(sequentialExample(_))
