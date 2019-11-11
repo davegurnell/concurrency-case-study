@@ -6,14 +6,14 @@ import cats.implicits._
 
 object Helpers {
   // Increase this to slow everything down:
-  val FIBONACCI_TARGET = 38
+  val FIB_MAX = 38
 
-  private def fib(n: Int): BigDecimal =
+  def fib(n: Int): BigDecimal =
     if(n <= 1) 1 else fib(n - 1) + fib(n - 2)
 
   def work[A](name: A): A =
     log(name.toString) {
-      fib(FIBONACCI_TARGET)
+      fib(FIB_MAX)
       name
     }
 

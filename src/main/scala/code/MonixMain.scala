@@ -82,6 +82,15 @@ object MonixMain {
       Task(???)
     }
 
+  def mapReduceExample =
+    logF("K") {
+      (1 to FIB_MAX)
+        .toList
+        .map(i => Task(log(i.toString)(fib(i))))
+        .parSequence
+        .map(_.combineAll)
+    }
+
   def runExample(numThreads: Int)(task: => Task[Any]): Unit = {
     val service: ExecutorService =
       Executors.newFixedThreadPool(numThreads)
@@ -113,9 +122,10 @@ object MonixMain {
       case "vpar2" => runExample(numThreads = 2)(veryParallelExample)
       case "vpar4" => runExample(numThreads = 4)(veryParallelExample)
       case "vpar8" => runExample(numThreads = 8)(veryParallelExample)
-      case "race" => runExample(numThreads = 8)(raceExample)
-      case "happy" => runExample(numThreads = 8)(happyPathExample)
-      case "unhappy" => runExample(numThreads = 8)(unhappyPathExample)
+      case "race" => runExample(numThreads = 2)(raceExample)
+      case "happy" => runExample(numThreads = 2)(happyPathExample)
+      case "unhappy" => runExample(numThreads = 2)(unhappyPathExample)
+      case "mapreduce" => runExample(numThreads = 8)(mapReduceExample)
     }
   }
 }

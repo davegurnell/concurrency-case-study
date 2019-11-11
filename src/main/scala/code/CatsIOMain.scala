@@ -4,9 +4,9 @@ import java.util.concurrent.{ExecutorService, Executors}
 
 import cats.effect.{ContextShift, IO, Resource, Timer}
 import cats.implicits._
-import code.FutureMain.{runExample, veryParallelExample, verySequentialExample}
+import code.MonixMain.{mapReduceExample, runExample}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 object CatsIOMain {
@@ -80,6 +80,15 @@ object CatsIOMain {
       IO(println("Using resource: " + resource)) *> IO(???)
     }
 
+  def mapReduceExample(implicit cs: ContextShift[IO]) =
+    logF("K") {
+      (1 to FIB_MAX)
+        .toList
+        .map(i => IO(log(i.toString)(fib(i))))
+        .parSequence
+        .map(_.combineAll)
+    }
+
   def runExample(numThreads: Int)(func: ContextShift[IO] => IO[Any]) = {
     val service: ExecutorService =
       Executors.newFixedThreadPool(numThreads)
@@ -114,6 +123,7 @@ object CatsIOMain {
       case "race" => runExample(numThreads = 2)(raceExample(_))
       case "happy" => runExample(numThreads = 2)(_ => happyPathExample)
       case "unhappy" => runExample(numThreads = 2)(_ => unhappyPathExample)
+      case "mapreduce" => runExample(numThreads = 8)(mapReduceExample(_))
     }
   }
 }

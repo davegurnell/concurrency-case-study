@@ -2,6 +2,7 @@ package code
 
 import java.util.concurrent.{ExecutorService, Executors}
 
+import cats.effect.{ContextShift, IO}
 import cats.implicits._
 
 import scala.concurrent.duration._
@@ -95,6 +96,11 @@ object FutureMain {
         .recoverWith { case exn => release(resource) *> Future.failed(exn) }
     }
 
+  def mapReduceExample(implicit ec: ExecutionContext) =
+    Future.traverse((1 to FIB_MAX).toList) { i =>
+      Future(log(i.toString)(fib(i)))
+    }.map(_.combineAll)
+
   def runExample(numThreads: Int)(func: ExecutionContext => Future[Any]): Unit = {
     val service: ExecutorService =
       Executors.newFixedThreadPool(numThreads)
@@ -126,9 +132,10 @@ object FutureMain {
       case "vpar2" => runExample(numThreads = 2)(veryParallelExample(_))
       case "vpar4" => runExample(numThreads = 4)(veryParallelExample(_))
       case "vpar8" => runExample(numThreads = 8)(veryParallelExample(_))
-      case "race" => runExample(numThreads = 1)(raceExample(_))
-      case "happy" => runExample(numThreads = 1)(happyPathExample(_))
+      case "race" => runExample(numThreads = 2)(raceExample(_))
+      case "happy" => runExample(numThreads = 2)(happyPathExample(_))
       case "unhappy" => runExample(numThreads = 2)(unhappyPathExample(_))
+      case "mapreduce" => runExample(numThreads = 8)(mapReduceExample(_))
     }
   }
 }
